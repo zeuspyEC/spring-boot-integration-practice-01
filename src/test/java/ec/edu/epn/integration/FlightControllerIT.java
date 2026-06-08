@@ -160,5 +160,20 @@ class FlightControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.flightNumber").value("AV101"))
                 .andExpect(jsonPath("$.status").value("SCHEDULED"));
-    }    
+    } 
+    @Test
+    void shouldFindFlightsByStatus() throws Exception {
+        crearVuelo("AV101"); // SCHEDULED
+
+        // Crear un vuelo con estado diferente para confirmar que el filtro funciona
+        FlightRequest retrasado = crearRequest("AV999", origenId, destinoId,
+                SALIDA.plusDays(2), LLEGADA.plusDays(2), "DELAYED");
+        mockMvc.perform(post("/api/flights")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(retrasado)));
+
+        mockMvc.perform(get("/api/flights/status/{estado}", "SCHEDULED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].status", everyItem(is("SCHEDULED"))));
+    }       
 }
