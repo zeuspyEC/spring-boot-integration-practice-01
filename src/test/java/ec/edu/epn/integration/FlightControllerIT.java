@@ -175,5 +175,20 @@ class FlightControllerIT {
         mockMvc.perform(get("/api/flights/status/{estado}", "SCHEDULED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].status", everyItem(is("SCHEDULED"))));
-    }       
+    }      
+    @Test
+    void shouldFindFlightsBetweenDates() throws Exception {
+        crearVuelo("AV101"); // salida = 2025-09-15T08:00
+
+        LocalDateTime inicio = SALIDA.minusHours(1);
+        LocalDateTime fin    = SALIDA.plusHours(1);
+
+        mockMvc.perform(get("/api/flights/between")
+                        .param("start", inicio.toString())
+                        .param("end",   fin.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$[0].flightNumber").value("AV101"));
+    }
+
 }
