@@ -71,8 +71,7 @@ class FlightControllerIT {
                 .andReturn();
         return objectMapper.readValue(r.getResponse().getContentAsString(), Airport.class);
     }
-    private FlightRequest crearRequest(String numero, Long origId, Long destId,
-                                        LocalDateTime salida, LocalDateTime llegada, String estado) {
+    private FlightRequest crearRequest(String numero, Long origId, Long destId, LocalDateTime salida, LocalDateTime llegada, String estado) {
         FlightRequest req = new FlightRequest();
         req.setFlightNumber(numero);
         req.setOriginId(origId);
@@ -82,4 +81,14 @@ class FlightControllerIT {
         req.setStatus(estado);
         return req;
     }
+    private Flight crearVuelo(String numero) throws Exception {
+        FlightRequest req = crearRequest(numero, origenId, destinoId, SALIDA, LLEGADA, "SCHEDULED");
+        MvcResult r = mockMvc.perform(post("/api/flights")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readValue(r.getResponse().getContentAsString(), Flight.class);
+    }
+
 }
