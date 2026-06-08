@@ -190,5 +190,39 @@ class FlightControllerIT {
                 .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
                 .andExpect(jsonPath("$[0].flightNumber").value("AV101"));
     }
+    @Test
+    void shouldUpdateFlight() throws Exception {
+        Flight creado = crearVuelo("AV101");
 
+        // Actualizar el estado a IN_FLIGHT
+        FlightRequest actualizacion = crearRequest("AV101", origenId, destinoId,
+                SALIDA, LLEGADA, "IN_FLIGHT");
+
+        mockMvc.perform(put("/api/flights/{id}", creado.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(actualizacion)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("IN_FLIGHT"));
+    }
+
+    @Test
+    void shouldReturn404WhenFlightNotFound() throws Exception {
+        mockMvc.perform(get("/api/flights/{id}", 99999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"));
+    }
+
+    @Test
+    void shouldDeleteFlight() throws Exception {
+        Flight creado = crearVuelo("AV101");
+
+        // Eliminar
+        mockMvc.perform(delete("/api/flights/{id}", creado.getId()))
+                .andExpect(status().isNoContent());
+
+        // Verificar que ya no existe → 404
+        mockMvc.perform(get("/api/flights/{id}", creado.getId()))
+                .andExpect(status().isNotFound());
+    }
 }
