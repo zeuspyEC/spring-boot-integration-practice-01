@@ -120,4 +120,16 @@ class FlightControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
+    @Test
+    void shouldRejectArrivalBeforeDeparture() throws Exception {
+        // Llegada anterior a la salida → debe rechazar con 400
+        FlightRequest req = crearRequest("AV202", origenId, destinoId,
+                LLEGADA, SALIDA, "SCHEDULED"); // invertido: llegada < salida
+
+        mockMvc.perform(post("/api/flights")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }    
 }
