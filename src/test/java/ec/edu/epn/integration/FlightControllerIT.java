@@ -90,5 +90,20 @@ class FlightControllerIT {
                 .andReturn();
         return objectMapper.readValue(r.getResponse().getContentAsString(), Flight.class);
     }
+    // ─── Pruebas ─────────────────────────────────────────────────────────────
 
+    @Test
+    void shouldCreateFlight() throws Exception {
+        FlightRequest req = crearRequest("AV101", origenId, destinoId, SALIDA, LLEGADA, "SCHEDULED");
+
+        mockMvc.perform(post("/api/flights")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.flightNumber").value("AV101"))
+                .andExpect(jsonPath("$.status").value("SCHEDULED"))
+                .andExpect(jsonPath("$.origin.code").value("UIO"))
+                .andExpect(jsonPath("$.destination.code").value("BOG"));
+    }
 }
