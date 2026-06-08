@@ -106,4 +106,18 @@ class FlightControllerIT {
                 .andExpect(jsonPath("$.origin.code").value("UIO"))
                 .andExpect(jsonPath("$.destination.code").value("BOG"));
     }
+    @Test
+    void shouldRejectDuplicateFlightNumber() throws Exception {
+        crearVuelo("AV101");
+
+        // Mismo número de vuelo → debe rechazar con 400
+        FlightRequest duplicado = crearRequest("AV101", origenId, destinoId,
+                SALIDA.plusDays(1), LLEGADA.plusDays(1), "SCHEDULED");
+
+        mockMvc.perform(post("/api/flights")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(duplicado)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
 }
