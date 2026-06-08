@@ -71,4 +71,15 @@ class FlightControllerIT {
                 .andReturn();
         return objectMapper.readValue(r.getResponse().getContentAsString(), Airport.class);
     }
+    private FlightRequest crearRequest(String numero, Long origId, Long destId,
+                                        LocalDateTime salida, LocalDateTime llegada, String estado) {
+        FlightRequest req = new FlightRequest();
+        req.setFlightNumber(numero);
+        req.setOriginId(origId);
+        req.setDestinationId(destId);
+        req.setDepartureTime(salida);
+        req.setArrivalTime(llegada);
+        req.setStatus(estado);
+        return req;
+    }
 }
