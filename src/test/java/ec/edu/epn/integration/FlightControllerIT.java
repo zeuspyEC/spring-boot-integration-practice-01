@@ -132,4 +132,14 @@ class FlightControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }    
+    @Test
+    void shouldFindAllFlights() throws Exception {
+        crearVuelo("AV101");
+        crearVuelo("AV102");
+
+        mockMvc.perform(get("/api/flights"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].flightNumber", containsInAnyOrder("AV101", "AV102")));
+    }    
 }
